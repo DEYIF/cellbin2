@@ -60,21 +60,21 @@ class ProcFile(BaseModel):
     quality_control: bool
     tissue_segmentation: bool
     cell_segmentation: bool
+    correct_r: int
     channel_align: int
     registration: ProcRegistration
-    magnification: int
     _supported_matrix = ['.gef', '.gz', '.gem']
     _supported_image = ['.tif', '.tiff', '.TIF', '.TIFF']
 
     @property
-    def tech(self,) -> TechType:
+    def tech(self, ) -> TechType:
         """
         Returns the TechType enum value corresponding to the tech_type string.
         """
         return TechType[self.tech_type]
 
     @property
-    def is_image(self,) -> bool:
+    def is_image(self, ) -> bool:
         """
         Checks if the file is an image based on its suffix.
         """
@@ -84,7 +84,7 @@ class ProcFile(BaseModel):
             return False
 
     @property
-    def is_matrix(self,) -> bool:
+    def is_matrix(self, ) -> bool:
         """
         Checks if the file is a matrix based on its suffix.
         """
@@ -94,14 +94,14 @@ class ProcFile(BaseModel):
             return False
 
     @property
-    def tag(self,):
+    def tag(self, ):
         """
         Returns the tag extracted from the file name.
         """
         return os.path.basename(self.file_path).split('.')[0]
 
     @property
-    def is_exists(self,):
+    def is_exists(self, ):
         """
         Checks if the file exists at the given file_path.
         """
@@ -168,19 +168,18 @@ class ProcMolecularFile(BaseModel):
 
     Attributes:
         exp_matrix (int): The experimental matrix.
-        cell_mask (Dict[str,List[int]]): The masks.
+        cell_mask (List[int]): The cell mask.
         extra_method (str): An additional molecular classification method, currently not used.
     """
     exp_matrix: int
-    cell_mask: Dict[str,List[int]] 
+    cell_mask: List[int]
     extra_method: str = ''  # additional molecular classification methods, currently not available
-    correct_r: int
 
 
 class Run(BaseModel):
     """
     A class representing a Run object with various boolean attributes.
-    
+
     Attributes:
         qc (bool): Whether or not quality control is performed.
         alignment (bool): Whether or not alignment is performed.
@@ -208,7 +207,7 @@ class ProcParam(BaseModel):
     def print_files_info(files: dict, mode: str = 'imageQC'):
         """
         Prints the information of files to be processed in a tabular format.
-        
+
         Args:
             files (dict): Dictionary of files to be processed.
             mode (str): Mode of processing, either 'imageQC' or 'Scheduler'.
@@ -230,7 +229,7 @@ class ProcParam(BaseModel):
     def check_inputs(self, cfg: Config):
         """
         Checks the validity of the input configuration for each image file.
-        
+
         Args:
             cfg (Config): Configuration object for validation.
         """
@@ -242,12 +241,12 @@ class ProcParam(BaseModel):
                         cheek_exists: bool = False) -> Dict[int, ProcFile]:
         """
         Retrieves and filters image files based on the specified criteria.
-        
+
         Args:
             do_image_qc (bool): Flag to include image QC files.
             do_scheduler (bool): Flag to include scheduler files.
             cheek_exists (bool): Flag to check if files exist.
-        
+
         Returns:
             Dict[int, ProcFile]: Dictionary of filtered image files.
         """
@@ -283,7 +282,7 @@ class ProcParam(BaseModel):
     def get_molecular_classify(self) -> Dict[int, ProcMolecularFile]:
         """
         Retrieves molecular classification files.
-        
+
         Returns:
             Dict[int, ProcMolecularFile]: Dictionary of molecular classification files.
         """
